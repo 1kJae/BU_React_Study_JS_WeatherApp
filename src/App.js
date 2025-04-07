@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import './App.css';
-import { wait } from '@testing-library/user-event/dist/utils';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { WeatherBox } from './component/WeatherBox';
+import { WeatherButton } from './component/WeatherButton';
 
 // 1. 앱이 실행 되자마자 현재 위치 기반의 날씨가 보인다.
 // 2. 날씨 정보에는 도시, 섭씨, 화씨, 날씨 상태
@@ -10,6 +12,8 @@ import { wait } from '@testing-library/user-event/dist/utils';
 // 6. 데이터를 들고오는 동안 로딩 스피너가 된다.
 
 function App() {
+  const [weather, setWeather] = useState(null);
+
   const getCurrentLocation = () => {
     navigator.geolocation.getCurrentPosition((position) => {
       let lat = position.coords.latitude;
@@ -19,18 +23,29 @@ function App() {
   }
 
   const getWeatherByCurrentLocation = async(lat, lon) => {
-    let url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=d714a94abc375fdc877a122ff4402bab`
+    let url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=d714a94abc375fdc877a122ff4402bab&units=metric`
     let response = await fetch(url)
     let data = await response.json();
-    console.log("data", data)
+    setWeather(data);
   }
 
+  const getWeatherByCity = async (city) => {
+    let url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=d714a94abc375fdc877a122ff4402bab&units=metric`;
+    let response = await fetch(url);
+    let data = await response.json();
+    setWeather(data);
+  }
+  
   useEffect(() => {
     getCurrentLocation()
   },[])
+
   return (
     <div>
-      
+      <div className='container'>
+        <WeatherBox weather={weather}/>
+        <WeatherButton getWeatherByCity={getWeatherByCity} getCurrentLocation={getCurrentLocation}/>
+      </div>
     </div>
   );
 }
